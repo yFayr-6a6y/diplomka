@@ -5,6 +5,7 @@ import com.example.diplomka.dto.Ad;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +28,11 @@ public class AdsController {
     public ResponseEntity<Ad> addAd(@RequestParam String properties, @RequestParam String image) {
         return ResponseEntity.status(201).body(new Ad()); // Заглушка
     }
-
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> removeAd(@PathVariable Integer id, Authentication authentication) {
+        AdsController adsService = null;
+        adsService.removeAd(id, authentication);
+        return ResponseEntity.noContent().build();
+    }
 
 }

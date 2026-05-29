@@ -2,25 +2,30 @@ package com.example.diplomka.controller;
 
 import com.example.diplomka.dto.Login;
 import com.example.diplomka.dto.Register;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import com.example.diplomka.service.AuthService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
-@Tag(name = "Авторизация и Регистрация")
+@RequiredArgsConstructor
 public class AuthController {
+    private final AuthService authService;
 
     @PostMapping("/login")
-    @Operation(summary = "Авторизация пользователя")
-    public ResponseEntity<?> login(@RequestBody Login login) {
+    public ResponseEntity<Void> login(@RequestBody Login login) {
+        // Здесь Spring Security Basic Auth делает проверку автоматически
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/register")
-    @Operation(summary = "Регистрация пользователя")
-    public ResponseEntity<?> register(@RequestBody Register register) {
-        return ResponseEntity.status(201).build();
+    public ResponseEntity<Void> register(@RequestBody Register register) {
+        if (authService.register(register)) {
+            return ResponseEntity.status(HttpStatus.CREATED).build();
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 }
