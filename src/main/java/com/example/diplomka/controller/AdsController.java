@@ -27,4 +27,6 @@ public class AdsController {
     public ResponseEntity<Ad> addAd(@RequestParam String properties, @RequestParam String image) {
         return ResponseEntity.status(201).body(new Ad()); // Заглушка
     }
+
+
 }
