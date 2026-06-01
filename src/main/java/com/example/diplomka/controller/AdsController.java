@@ -1,38 +1,42 @@
 package com.example.diplomka.controller;
 
-import com.example.diplomka.dto.Ads;
 import com.example.diplomka.dto.Ad;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
+import com.example.diplomka.dto.Ads;
+import com.example.diplomka.dto.CreateOrUpdateAd;
+import com.example.diplomka.mapper.AdMapper;
+import com.example.diplomka.service.AdsService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.stream.Collectors;
 
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
 @RequestMapping("/ads")
-@Tag(name = "Объявления")
+@RequiredArgsConstructor
 public class AdsController {
+    private final AdsService adsService;
+    private final AdMapper adMapper;
 
     @GetMapping
-    @Operation(summary = "Получение всех объявлений")
-    @ApiResponse(responseCode = "200", description = "OK")
     public ResponseEntity<Ads> getAllAds() {
-        return ResponseEntity.ok(new Ads()); // Заглушка
+        var adsList = adsService.findAll().stream().map(adMapper::toDTO).collect(Collectors.toList());
+        return ResponseEntity.ok(new Ads(adsList.size(), adsList));
     }
 
-    @PostMapping
-    @Operation(summary = "Добавление объявления")
-    @ApiResponse(responseCode = "201", description = "Created")
-    public ResponseEntity<Ad> addAd(@RequestParam String properties, @RequestParam String image) {
-        return ResponseEntity.status(201).body(new Ad()); // Заглушка
+    @PostMapping(consumes = {"multipart/form-data"})
+    public ResponseEntity<Ad> addAd(@RequestPart("properties") CreateOrUpdateAd properties,
+                                    @RequestPart("image") MultipartFile image,
+                                    Authentication auth) {
+        return ResponseEntity.status(201).body(adMapper.toDTO(adsService.addAd(properties, image, auth)));
     }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> removeAd(@PathVariable Integer id, Authentication authentication) {
-        AdsController adsService = null;
-        adsService.removeAd(id, authentication);
+    public ResponseEntity<Void> removeAd(@PathVariable Integer id, Authentication auth) {
+        adsService.removeAd(id, auth);
         return ResponseEntity.noContent().build();
     }
-
 }

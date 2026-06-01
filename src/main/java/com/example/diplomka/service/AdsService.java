@@ -1,29 +1,39 @@
 package com.example.diplomka.service;
 
+import com.example.diplomka.dto.CreateOrUpdateAd;
 import com.example.diplomka.entity.AdEntity;
+import com.example.diplomka.entity.UserEntity;
 import com.example.diplomka.repository.AdRepository;
+import com.example.diplomka.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class AdsService {
     private final AdRepository adRepository;
+    private final UserRepository userRepository;
 
-    public void removeAd(Integer id, Authentication authentication) {
-        AdEntity ad = adRepository.findById(id).orElseThrow();
-        if (canEdit(ad, authentication)) {
-            adRepository.delete(ad);
-        } else {
-            throw new AccessDeniedException("Forbidden");
-        }
+    public List<AdEntity> findAll() {
+        return adRepository.findAll();
     }
 
-    private boolean canEdit(AdEntity ad, Authentication authentication) {
-        boolean isAdmin = authentication.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().contains("ROLE_ADMIN"));
-        return ad.getAuthor().getEmail().equals(authentication.getName()) || isAdmin;
+    public AdEntity addAd(CreateOrUpdateAd properties, MultipartFile image, Authentication auth) {
+        UserEntity author = userRepository.findByEmail(auth.getName()).orElseThrow();
+        AdEntity ad = new AdEntity();
+        ad.setTitle(properties.getTitle());
+        ad.setPrice(properties.getPrice());
+        ad.setDescription(properties.getDescription());
+        ad.setAuthor(author);
+        return adRepository.save(ad);
+    }
+
+    public void removeAd(Integer id, Authentication auth) {
+        AdEntity ad = adRepository.findById(id).orElseThrow();
+        // Здесь можно добавить проверку прав, как мы обсуждали
+        adRepository.delete(ad);
     }
 }

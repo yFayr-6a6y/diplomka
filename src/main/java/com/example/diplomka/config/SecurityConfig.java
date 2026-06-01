@@ -16,13 +16,13 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable())
+        http.csrf(csrf -> csrf.disable())
                 .cors(withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "/ads").permitAll()
                         .requestMatchers("/login", "/register").permitAll()
-                        .requestMatchers("/ads/**", "/users/**", "/comments/**").authenticated()
+                        .requestMatchers("/ads/**", "/users/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/ads/**").hasRole("ADMIN")
                 )
                 .httpBasic(withDefaults());
         return http.build();
