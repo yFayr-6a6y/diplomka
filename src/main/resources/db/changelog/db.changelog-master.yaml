@@ -88,3 +88,18 @@ databaseChangeLog:
               - column:
                   name: user_id
                   type: int
+  - changeSet:
+      id: 4
+      author: yak
+      changes:
+        - createTable:
+            tableName: images
+            columns:
+              - column:
+                  name: id
+                  type: varchar(255)
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: bytes
+                  type: blob

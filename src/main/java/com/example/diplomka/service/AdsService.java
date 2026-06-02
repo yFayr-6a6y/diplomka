@@ -18,6 +18,7 @@ import java.util.List;
 public class AdsService {
     private final AdRepository adRepository;
     private final UserRepository userRepository;
+    private final ImageService imageService;
 
     public List<AdEntity> findAll() { return adRepository.findAll(); }
 
@@ -47,29 +48,37 @@ public class AdsService {
         ad.setPrice(properties.getPrice());
         ad.setDescription(properties.getDescription());
         ad.setAuthor(author);
+        ad.setImage(imageService.saveImage(image)); // Сохраняем картинку
         return adRepository.save(ad);
     }
 
     public AdEntity updateAd(Integer id, CreateOrUpdateAd body, Authentication auth) {
         AdEntity ad = adRepository.findById(id).orElseThrow();
-        checkPermissions(ad.getAuthor().getEmail(), auth); // ПРОВЕРКА ПРАВ
+        checkPermissions(ad.getAuthor().getEmail(), auth);
         ad.setTitle(body.getTitle());
         ad.setPrice(body.getPrice());
         ad.setDescription(body.getDescription());
         return adRepository.save(ad);
     }
 
+    public byte[] updateImage(Integer id, MultipartFile image, Authentication auth) {
+        AdEntity ad = adRepository.findById(id).orElseThrow();
+        checkPermissions(ad.getAuthor().getEmail(), auth);
+        ad.setImage(imageService.saveImage(image));
+        adRepository.save(ad);
+        return imageService.getImage(ad.getImage().replace("/images/", ""));
+    }
+
     public void removeAd(Integer id, Authentication auth) {
         AdEntity ad = adRepository.findById(id).orElseThrow();
-        checkPermissions(ad.getAuthor().getEmail(), auth); // ПРОВЕРКА ПРАВ
+        checkPermissions(ad.getAuthor().getEmail(), auth);
         adRepository.delete(ad);
     }
 
-    // Проверка: автор ли это ИЛИ админ
     private void checkPermissions(String authorEmail, Authentication auth) {
         boolean isAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().contains("ROLE_ADMIN"));
         if (!authorEmail.equals(auth.getName()) && !isAdmin) {
-            throw new AccessDeniedException("Нет прав для изменения/удаления");
+            throw new AccessDeniedException("Нет прав");
         }
     }
 }

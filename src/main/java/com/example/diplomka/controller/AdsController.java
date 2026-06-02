@@ -6,6 +6,7 @@ import com.example.diplomka.dto.CreateOrUpdateAd;
 import com.example.diplomka.dto.ExtendedAd;
 import com.example.diplomka.mapper.AdMapper;
 import com.example.diplomka.service.AdsService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +14,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.stream.Collectors;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
@@ -31,17 +31,15 @@ public class AdsController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Ad> addAd(@RequestPart("properties") String propertiesString,
-                                    @RequestPart("image") MultipartFile image,
-                                    Authentication auth) {
+                                    @RequestPart("image") MultipartFile image, Authentication auth) {
         try {
-            // Ручная конвертация строки в объект (обход бага Swagger)
+            // Обход бага Swagger для корректного чтения JSON
             ObjectMapper objectMapper = new ObjectMapper();
             CreateOrUpdateAd properties = objectMapper.readValue(propertiesString, CreateOrUpdateAd.class);
-
             return ResponseEntity.status(201).body(adMapper.toDTO(adsService.addAd(properties, image, auth)));
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.badRequest().build(); // Вернет 400, если JSON кривой
+            return ResponseEntity.badRequest().build();
         }
     }
 
@@ -69,7 +67,6 @@ public class AdsController {
 
     @PatchMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<byte[]> updateImage(@PathVariable Integer id, @RequestPart("image") MultipartFile image, Authentication auth) {
-        // Заглушка возврата картинки для фронта (в реале тут сохранение)
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(adsService.updateImage(id, image, auth));
     }
 }

@@ -39,7 +39,7 @@ public class UserController {
 
     @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> updateUserImage(@RequestPart("image") MultipartFile image, Authentication auth) {
-        // Заглушка обновления аватарки
+        userService.updateImage(image, auth.getName());
         return ResponseEntity.ok().build();
     }
 }

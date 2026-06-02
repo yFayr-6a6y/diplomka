@@ -19,18 +19,11 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .cors(withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        // 1. Разрешаем публичный доступ к интерфейсу Swagger
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
-
-                        // 2. Твои остальные публичные доступы
+                        .requestMatchers("/images/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .requestMatchers(HttpMethod.GET, "/ads").permitAll()
                         .requestMatchers("/login", "/register").permitAll()
-
-                        // 3. Защищенные доступы (только для авторизованных с ролью)
                         .requestMatchers("/ads/**", "/users/**", "/comments/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/ads/**").hasRole("ADMIN")
-
-                        // 4. Все остальные запросы требуют авторизации
                         .anyRequest().authenticated()
                 )
                 .httpBasic(basic -> basic.authenticationEntryPoint((request, response, authException) ->
