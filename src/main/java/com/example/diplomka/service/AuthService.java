@@ -23,7 +23,15 @@ public class AuthService {
         user.setFirstName(reg.getFirstName());
         user.setLastName(reg.getLastName());
         user.setPhone(reg.getPhone());
-        user.setRole(reg.getRole());
+
+        // Безопасная обработка роли (защита от NullPointerException)
+        String role = reg.getRole();
+        if (role == null || role.trim().isEmpty()) {
+            user.setRole("ROLE_USER"); // Если роль не передали, ставим дефолтную
+        } else {
+            user.setRole(role.startsWith("ROLE_") ? role : "ROLE_" + role.toUpperCase());
+        }
+
         userRepository.save(user);
         return true;
     }

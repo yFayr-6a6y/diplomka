@@ -12,8 +12,13 @@ public class CommentEntity {
     private Integer pk;
 
     private String text;
+    private Long createdAt; // Нужно для вывода времени
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private UserEntity author; // Вот это поле важно!
+    private UserEntity author;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ad_id")
+    private AdEntity ad; // Связь с объявлением
 }

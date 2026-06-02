@@ -2,8 +2,8 @@ package com.example.diplomka.repository;
 
 import com.example.diplomka.entity.CommentEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import java.util.List;
 
-@Repository
 public interface CommentRepository extends JpaRepository<CommentEntity, Integer> {
+    List<CommentEntity> findAllByAd_Pk(Integer adId);
 }
