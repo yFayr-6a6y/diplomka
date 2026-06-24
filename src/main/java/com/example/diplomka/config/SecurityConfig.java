@@ -19,11 +19,12 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .cors(withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/images/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/ads").permitAll()
-                        .requestMatchers("/login", "/register").permitAll()
-                        .requestMatchers("/ads/**", "/users/**", "/comments/**").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/ads/**").hasRole("ADMIN")
+                        // 1. Возвращаем доступ к Swagger, картинкам, регистрации и логину
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers("/login", "/register", "/images/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/ads", "/ads/**").permitAll()
+
+                        // 2. ВСЁ остальное (добавление, удаление, профиль) — только по паролю
                         .anyRequest().authenticated()
                 )
                 .httpBasic(basic -> basic.authenticationEntryPoint((request, response, authException) ->
